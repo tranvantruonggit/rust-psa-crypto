@@ -10,7 +10,7 @@ pub mod cipher;
 pub mod key_agreement;
 pub mod key_derivation;
 pub mod key_management;
-//pub mod mac; Mbed Crypto does not support mac compute or verify yet (as of 16/07/20)
+pub mod mac; //Mbed Crypto does not support mac compute or verify yet (as of 16/07/20)
 pub mod hash;
 pub mod message_digest;
 pub mod other;

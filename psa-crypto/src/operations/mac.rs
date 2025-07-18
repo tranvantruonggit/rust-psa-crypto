@@ -6,7 +6,7 @@
 use crate::initialized;
 use crate::types::key::Id;
 use crate::types::algorithm::Mac;
-use crate::types::status::{Result, Status, Error};
+use crate::types::status::{Result, Status};
 
 
 /// Calculate the message authentication code (MAC) of a message
@@ -51,7 +51,7 @@ pub fn compute_mac(key_id: Id, mac_alg: Mac, input_message: &[u8], mac: &mut [u8
     initialized()?;
 
     let mut output_length = 0;
-    let key_handle = key_id.handle()?;
+    let key_handle = key_id.0;
 
     let mac_compute_res = Status::from(unsafe {
         psa_crypto_sys::psa_mac_compute(
@@ -64,9 +64,7 @@ pub fn compute_mac(key_id: Id, mac_alg: Mac, input_message: &[u8], mac: &mut [u8
             &mut output_length,
         )}
     ).to_result();
-    let close_handle_res = key_id.close_handle(key_handle);
     mac_compute_res?;
-    close_handle_res?;
     Ok(output_length)
 }
 
@@ -112,7 +110,7 @@ pub fn compute_mac(key_id: Id, mac_alg: Mac, input_message: &[u8], mac: &mut [u8
 pub fn verify_mac(key_id: Id, mac_alg: Mac, input_message: &[u8], expected_mac: &[u8]) -> Result<()> {
     initialized()?;
 
-    let key_handle = key_id.handle()?;
+    let key_handle = key_id.0;
 
     let mac_verify_res = Status::from(unsafe {
         psa_crypto_sys::psa_mac_verify(
@@ -124,7 +122,6 @@ pub fn verify_mac(key_id: Id, mac_alg: Mac, input_message: &[u8], expected_mac: 
             expected_mac.len(),
         )}
     ).to_result();
-    let close_handle_res = key_id.close_handle(key_handle);
     mac_verify_res?;
-    close_handle_res
+    Ok(())
 }
