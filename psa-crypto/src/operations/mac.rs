@@ -48,8 +48,10 @@ use crate::types::status::{Result, Status};
 /// mac.resize(size, 0);
 /// ```
 pub fn compute_mac(key_id: Id, mac_alg: Mac, input_message: &[u8], mac: &mut [u8]) -> Result<usize> {
+    // Check if PSA Crypto is initialized
     initialized()?;
-
+    /* At the moment (July 2025), support only CMAC */
+    
     let mut output_length = 0;
     let key_handle = key_id.0;
 
