@@ -7,6 +7,7 @@ use crate::initialized;
 use crate::types::key::Id;
 use crate::types::algorithm::Mac;
 use crate::types::status::{Result, Status};
+use crate::types::operation::MacOperation;
 
 
 /// Calculate the message authentication code (MAC) of a message
@@ -125,5 +126,25 @@ pub fn verify_mac(key_id: Id, mac_alg: Mac, input_message: &[u8], expected_mac: 
         )}
     ).to_result();
     mac_verify_res?;
+    Ok(())
+}
+
+/// Setup MAC Operation, in some cryptography application, one key have a quite long lifetime that
+/// the key will be reused for every message. However, the operation like CMAC need AES
+/// key expansion, and it is expensive, thus this setup operation can do the key expansion
+/// and the subsequence operation can just reused the expanded round keys.
+pub fn mac_sign_setup(operation :MacOperation, key_id: Id, mac_alg: Mac) -> Result<()>{
+    initialized()?;
+
+    let key_handle = key_id.0;
+    let mut psa_op: psa_crypto_sys::psa_mac_operation_t = operation.into();
+    let mac_init_status = Status::from(unsafe {
+        psa_crypto_sys:: psa_mac_sign_setup(
+            &mut psa_op,
+            key_handle,
+            mac_alg.into()
+        )
+    }).to_result();
+    mac_init_status?;
     Ok(())
 }

@@ -7,3 +7,4 @@ pub mod algorithm;
 pub mod key;
 pub mod key_derivation;
 pub mod status;
+pub mod operation;
