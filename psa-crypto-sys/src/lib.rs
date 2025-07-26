@@ -46,7 +46,7 @@ pub use psa_crypto_binding::{
     psa_get_key_attributes, psa_hash_compare, psa_hash_compute, psa_import_key,
     psa_key_derivation_abort, psa_key_derivation_input_bytes, psa_key_derivation_input_key,
     psa_key_derivation_key_agreement, psa_key_derivation_output_key,
-    psa_key_derivation_set_capacity, psa_key_derivation_setup, psa_mac_compute, psa_mac_verify,psa_mac_sign_setup,
+    psa_key_derivation_set_capacity, psa_key_derivation_setup, psa_mac_compute, psa_mac_verify,psa_mac_sign_setup, psa_mac_sign_finish, psa_mac_update,
     psa_open_key, psa_raw_key_agreement, psa_reset_key_attributes, psa_sign_hash, psa_verify_hash,
 };
 

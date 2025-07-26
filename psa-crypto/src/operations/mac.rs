@@ -133,18 +133,51 @@ pub fn verify_mac(key_id: Id, mac_alg: Mac, input_message: &[u8], expected_mac: 
 /// the key will be reused for every message. However, the operation like CMAC need AES
 /// key expansion, and it is expensive, thus this setup operation can do the key expansion
 /// and the subsequence operation can just reused the expanded round keys.
-pub fn mac_sign_setup(operation :MacOperation, key_id: Id, mac_alg: Mac) -> Result<()>{
+pub fn mac_sign_setup(operation : &mut MacOperation, key_id: Id, mac_alg: Mac) -> Result<()>{
     initialized()?;
 
     let key_handle = key_id.0;
-    let mut psa_op: psa_crypto_sys::psa_mac_operation_t = operation.into();
     let mac_init_status = Status::from(unsafe {
         psa_crypto_sys:: psa_mac_sign_setup(
-            &mut psa_op,
+            operation.as_mut_ptr(),
             key_handle,
             mac_alg.into()
         )
     }).to_result();
     mac_init_status?;
     Ok(())
+}
+
+/// Function to feed data to MAC operation, in this function we do not need keyID
+/// because it is embedded inside the MacOperation
+pub fn mac_update(operation : &mut MacOperation, input : &[u8]) -> Result<()> {
+    initialized()?;
+
+    let mac_update_status = Status::from(unsafe{
+        psa_crypto_sys:: psa_mac_update(
+            operation.as_mut_ptr(),
+            input.as_ptr(),
+            input.len()
+        )
+    }).to_result();
+    mac_update_status?;
+    Ok(())
+}
+
+/// Function to indicate the end of the MAC compute operation in the multi-part MAC 
+/// calculation
+pub fn mac_sign_finish(operation : &mut MacOperation, output: &mut [u8]) -> Result<usize> {
+    initialized()?;
+    let mut output_length = 0;
+    
+    let mac_finish_status = Status :: from (unsafe{
+        psa_crypto_sys:: psa_mac_sign_finish(
+            operation.as_mut_ptr(),
+            output.as_mut_ptr(),
+            output.len(),
+            &mut output_length
+        )
+    }).to_result();
+    mac_finish_status?;
+    Ok(output_length)
 }
